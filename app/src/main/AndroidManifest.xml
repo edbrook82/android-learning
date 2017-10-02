@@ -18,7 +18,7 @@
         </activity>
 
         <provider
-            android:name=".TodoContentProvider"
+            android:name=".model.TodoContentProvider"
             android:authorities="uk.co.dekoorb.android.todo"
             android:enabled="true"
             android:exported="false"/>
