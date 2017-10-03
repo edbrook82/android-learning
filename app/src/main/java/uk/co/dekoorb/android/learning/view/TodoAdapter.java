@@ -1,6 +1,7 @@
 package uk.co.dekoorb.android.learning.view;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,13 +9,17 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import uk.co.dekoorb.android.learning.R;
-import uk.co.dekoorb.android.learning.model.TodoOpenHelper;
 
 /**
  * Created by c3469162 on 03/10/2017.
  */
 
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoHolder> {
+
+    public interface TodoItemActions {
+        void onTodoClick();
+        void onTodoLongClick();
+    }
 
     public class TodoHolder extends RecyclerView.ViewHolder {
         private final TextView mTodoTitle;
@@ -64,11 +69,21 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoHolder> {
     public void onBindViewHolder(TodoHolder holder, int position) {
         holder.setTitle("Hello " + Integer.toString(position));
         holder.setNote("This is a test note!");
-        holder.setChecked(Math.random() > 0.5);
+        holder.setChecked(position % 3 == 1);
+    }
+
+    private int mItemCount = 2;
+    public void add() {
+        mItemCount++;
+        notifyDataSetChanged();
+    }
+    public void sub() {
+        mItemCount--;
+        notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return 15;
+        return mItemCount;
     }
 }
