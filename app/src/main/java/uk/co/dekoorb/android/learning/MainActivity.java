@@ -61,33 +61,7 @@ public class MainActivity extends AppCompatActivity
         subBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String[] projection = new String[] {
-                        TodoContract.Todo.COLUMN_TITLE,
-                        TodoContract.Todo.COLUMN_NOTE,
-                        TodoContract.Todo.COLUMN_COMPLETED};
-
-                Cursor cursor = getContentResolver().query(
-                        TodoContract.Todo.CONTENT_URI,
-                        projection,
-                        null,
-                        null,
-                        null);
-
-                if (cursor != null) {
-                    int titleIndex = cursor.getColumnIndex(TodoContract.Todo.COLUMN_TITLE);
-                    int noteIndex = cursor.getColumnIndex(TodoContract.Todo.COLUMN_NOTE);
-                    int completedIndex = cursor.getColumnIndex(TodoContract.Todo.COLUMN_COMPLETED);
-
-                    while (cursor.moveToNext()) {
-                        String title = cursor.getString(titleIndex);
-                        String note = cursor.getString(noteIndex);
-                        boolean completed = cursor.getInt(completedIndex) == 1;
-
-                        Log.d(TAG, String.format("onClick: %s, %s, %s", title, note, completed));
-                    }
-                    cursor.close();
-                }
-
+                getContentResolver().delete(TodoContract.Todo.CONTENT_URI,null, null);
             }
         });
     }

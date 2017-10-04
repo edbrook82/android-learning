@@ -33,8 +33,18 @@ public class TodoContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        // Implement this to handle requests to delete one or more rows.
-        throw new UnsupportedOperationException("Not yet implemented");
+        final SQLiteDatabase db = mTodoDbHelper.getWritableDatabase();
+        int id;
+        int match = sUriMatcher.match(uri);
+        switch (match) {
+            case TODOS:
+                id = db.delete(TodoContract.Todo.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return id;
     }
 
     @Override
