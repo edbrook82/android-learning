@@ -1,7 +1,7 @@
 package uk.co.dekoorb.android.learning.view;
 
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import uk.co.dekoorb.android.learning.R;
+import uk.co.dekoorb.android.learning.model.TodoContract;
 
 /**
  * Created by c3469162 on 03/10/2017.
@@ -16,45 +17,21 @@ import uk.co.dekoorb.android.learning.R;
 
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoHolder> {
 
-    public interface TodoItemActions {
-        void onTodoClick();
-        void onTodoLongClick();
-    }
+    private Cursor mCursor;
+    private int mTitleIndex;
+    private int mNoteIndex;
+    private int mCompletedIndex;
 
-    public class TodoHolder extends RecyclerView.ViewHolder {
-        private final TextView mTodoTitle;
-        private final TextView mTodoNote;
-        private final CheckBox mTodoCompleted;
+    class TodoHolder extends RecyclerView.ViewHolder {
+        final TextView title;
+        final TextView note;
+        final CheckBox completed;
 
-        public TodoHolder(View view) {
+        TodoHolder(View view) {
             super(view);
-            mTodoTitle = view.findViewById(R.id.tv_title);
-            mTodoNote = view.findViewById(R.id.tv_note);
-            mTodoCompleted = view.findViewById(R.id.cb_completed);
-        }
-
-        public String getTitle() {
-            return mTodoTitle.getText().toString();
-        }
-
-        public String getNote() {
-            return mTodoNote.getText().toString();
-        }
-
-        public boolean isChecked() {
-            return mTodoCompleted.isChecked();
-        }
-
-        public void setTitle(String title) {
-            mTodoTitle.setText(title);
-        }
-
-        public void setNote(String note) {
-            mTodoNote.setText(note);
-        }
-
-        public void setChecked(boolean checked) {
-            mTodoCompleted.setChecked(checked);
+            title = view.findViewById(R.id.tv_title);
+            note = view.findViewById(R.id.tv_note);
+            completed = view.findViewById(R.id.cb_completed);
         }
     }
 
@@ -67,23 +44,30 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoHolder> {
 
     @Override
     public void onBindViewHolder(TodoHolder holder, int position) {
-        holder.setTitle("Hello " + Integer.toString(position));
-        holder.setNote("This is a test note!");
-        holder.setChecked(position % 3 == 1);
+        if (mCursor.moveToPosition(position)) {
+            holder.title.setText(mCursor.getString(mTitleIndex));
+            holder.note.setText(mCursor.getString(mNoteIndex));
+            holder.completed.setChecked(mCursor.getInt(mCompletedIndex) == 1);
+        }
     }
 
-    private int mItemCount = 2;
-    public void add() {
-        mItemCount++;
-        notifyDataSetChanged();
-    }
-    public void sub() {
-        mItemCount--;
+    public void swapCursor(Cursor cursor) {
+        if (mCursor != null) {
+            mCursor.close();
+        }
+        mCursor = cursor;
+        mTitleIndex = mCursor.getColumnIndex(TodoContract.Todo.COLUMN_TITLE);
+        mNoteIndex = mCursor.getColumnIndex(TodoContract.Todo.COLUMN_NOTE);
+        mCompletedIndex = mCursor.getColumnIndex(TodoContract.Todo.COLUMN_COMPLETED);
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return mItemCount;
+        int count = 0;
+        if (mCursor != null) {
+            count = mCursor.getCount();
+        }
+        return count;
     }
 }

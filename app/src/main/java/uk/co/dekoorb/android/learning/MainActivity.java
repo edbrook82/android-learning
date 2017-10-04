@@ -3,8 +3,8 @@ package uk.co.dekoorb.android.learning;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,13 +12,17 @@ import android.view.View;
 import android.widget.Button;
 
 import uk.co.dekoorb.android.learning.model.TodoContract;
+import uk.co.dekoorb.android.learning.model.TodoLoader;
 import uk.co.dekoorb.android.learning.view.TodoAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements TodoLoader.TodoLoaderCallbacks {
 
     private static final String TAG = "MainActivity";
+    public static final int TODO_LOADER_ID = 1;
 
     private TodoAdapter mAdapter;
+    private TodoLoader mTodoLoader;
     private RecyclerView mItemsList;
 
     @Override
@@ -33,15 +37,17 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new TodoAdapter();
         mItemsList.setAdapter(mAdapter);
 
+        mTodoLoader = new TodoLoader(this, this);
+        getSupportLoaderManager().initLoader(TODO_LOADER_ID, null, mTodoLoader);
+
         Button addBtn = (Button) findViewById(R.id.btn_add);
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAdapter.add();
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(TodoContract.Todo.COLUMN_TITLE, "Test_" + (int) (Math.random()*1e6));
                 contentValues.put(TodoContract.Todo.COLUMN_NOTE, "Just a test note");
-                contentValues.put(TodoContract.Todo.COLUMN_COMPLETED, true);
+                contentValues.put(TodoContract.Todo.COLUMN_COMPLETED, Math.random() > 0.6);
 
                 Uri uri = getContentResolver().insert(
                         TodoContract.Todo.CONTENT_URI,
@@ -55,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
         subBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAdapter.sub();
-
                 String[] projection = new String[] {
                         TodoContract.Todo.COLUMN_TITLE,
                         TodoContract.Todo.COLUMN_NOTE,
@@ -81,8 +85,15 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.d(TAG, String.format("onClick: %s, %s, %s", title, note, completed));
                     }
+                    cursor.close();
                 }
+
             }
         });
+    }
+
+    @Override
+    public void onLoadComplete(Cursor cursor) {
+        mAdapter.swapCursor(cursor);
     }
 }
